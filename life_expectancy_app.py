@@ -1,4 +1,3 @@
-
 import streamlit as st
 import torch
 import torch.nn as nn
@@ -6,11 +5,11 @@ import numpy as np
 import pandas as pd
 import joblib
 
-# Define the model architecture (must match the one used during training)
+# Define the model architecture (8 input features)
 class LifeExpectancyModel(nn.Module):
     def __init__(self):
         super(LifeExpectancyModel, self).__init__()
-        self.fc1 = nn.Linear(7, 64)
+        self.fc1 = nn.Linear(8, 64)  # 8 input features
         self.fc2 = nn.Linear(64, 32)
         self.fc3 = nn.Linear(32, 1)
 
