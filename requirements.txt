@@ -1,4 +1,5 @@
 streamlit
+torch
 pandas
-spacy
-textblob
+numpy
+joblib
