@@ -2,8 +2,9 @@ import streamlit as st
 import torch
 import torch.nn as nn
 import numpy as np
+import pandas as pd
 
-# 🎯 Model Architecture
+# 🔧 Define the model architecture
 class LifeExpectancyModel(nn.Module):
     def __init__(self):
         super(LifeExpectancyModel, self).__init__()
@@ -16,7 +17,7 @@ class LifeExpectancyModel(nn.Module):
         x = torch.relu(self.fc2(x))
         return self.fc3(x)
 
-# 🚀 Initialize Model
+# 🧠 Load trained model
 model = LifeExpectancyModel()
 MODEL_PATH = "life_expectancy_model.pth"
 
@@ -27,22 +28,31 @@ try:
 except Exception as e:
     st.sidebar.error(f"❌ Failed to load model: {e}")
 
-# ✳️ Hardcoded Scaler (replace values with your real means/stds if known)
+# 🧮 Scaler values (replace with your own if needed)
 scaler_mean = np.array([4532.5, 13700000, 2007, 0.2, 0.2, 0.2, 0.2, 0.2])
 scaler_scale = np.array([2100.0, 6800000, 10.0, 0.4, 0.4, 0.4, 0.4, 0.4])
 
-# 🌍 App UI
-st.title("🌍 Life Expectancy Prediction App")
-st.markdown("Predict life expectancy using economic and demographic indicators.")
+# 🌍 App Layout
+st.title("🌍 Life Expectancy Prediction")
+st.markdown("Upload a dataset or enter details below to predict life expectancy.")
 
-# 📋 Inputs
-st.header("📋 Input Country Data")
+# 📁 File Upload
+uploaded_file = st.file_uploader("📤 Upload a CSV file (optional)", type=["csv"])
+if uploaded_file:
+    df = pd.read_csv(uploaded_file)
+    st.markdown("📊 **Preview of uploaded dataset:**")
+    st.dataframe(df.head())
+
+st.divider()
+st.header("📝 Manual Input for Prediction")
+
+# 🧾 Input Features
 gdp = st.number_input("GDP per Capita", min_value=0.0, value=3000.0)
 population = st.number_input("Population", min_value=0.0, value=10000000.0)
 year = st.number_input("Year", min_value=1950, max_value=2025, value=2007)
-continent = st.selectbox("Continent", ["Asia", "Europe", "Africa", "Americas", "Oceania"])
 
-# 🌐 Continent One-Hot Encoding
+# 🌎 Continent
+continent = st.selectbox("Continent", ["Asia", "Europe", "Africa", "Americas", "Oceania"])
 continent_map = {
     "Asia":     [1, 0, 0, 0, 0],
     "Europe":   [0, 1, 0, 0, 0],
@@ -51,15 +61,12 @@ continent_map = {
     "Oceania":  [0, 0, 0, 0, 1]
 }
 
-input_vector = [gdp, population, year] + continent_map[continent]
-input_array = np.array([input_vector], dtype=np.float32)
-
-# 🧪 Normalize
-input_scaled = (input_array - scaler_mean) / scaler_scale
-input_tensor = torch.tensor(input_scaled, dtype=torch.float32)
-
-# 🔮 Predict
+# 🧠 Prediction
 if st.button("🔮 Predict Life Expectancy"):
+    input_vector = [gdp, population, year] + continent_map[continent]
+    input_array = np.array([input_vector], dtype=np.float32)
+    input_scaled = (input_array - scaler_mean) / scaler_scale
+    input_tensor = torch.tensor(input_scaled, dtype=torch.float32)
     with torch.no_grad():
         prediction = model(input_tensor).item()
     st.success(f"📈 Predicted Life Expectancy: **{prediction:.2f} years**")
